@@ -1,18 +1,21 @@
 import streamlit as st
-import requests
 
-st.title("Get Your Public IP Address using ipify")
-
-def fetch_public_ip():
-    try:
-        response = requests.get("https://api.ipify.org")
-        if response.status_code == 200:
-            return response.text.strip()
+def get_client_ip():
+    # Try to extract headers where proxies/load balancers may pass client IP
+    headers = st.context.headers if hasattr(st, "context") and hasattr(st.context, "headers") else None
+    if headers:
+        # Check common headers
+        if "x-forwarded-for" in headers:
+            ip = headers["x-forwarded-for"].split(",")[0]
+        elif "remote-addr" in headers:
+            ip = headers["remote-addr"]
         else:
-            st.warning(f"Unexpected response: {response.status_code}")
-    except requests.RequestException as e:
-        st.error(f"Error fetching IP: {e}")
-    return "Unavailable"
+            ip = "Unknown"
+    else:
+        ip = "Localhost (no headers)"
+    return ip
 
-public_ip = fetch_public_ip()
-st.write(f"Your public IP address is: **{public_ip}**")
+st.title("Get User IP in Streamlit")
+
+ip_address = get_client_ip()
+st.write(f"Your IP Address is: **{ip_address}**")
