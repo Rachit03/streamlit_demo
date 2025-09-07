@@ -1,29 +1,26 @@
-import streamlit as st
 from streamlit_javascript import st_javascript
-import requests
-st.title("Client IP Address")
+import streamlit as st
 
-ip = st_javascript("await fetch('https://api.ipify.org?format=json').then(res => res.json()).then(data => data.ip)")
-st.write("Your IP Address is:", ip)
-import requests
+def get_user_location():
+    ip = st_javascript("""
+        async () => {
+            const res = await fetch('https://api.ipify.org?format=json');
+            const data = await res.json();
+            return data.ip;
+        }
+    """)
 
-def get_ip_info(ip_address):
-    try:
-        url = f"https://ipapi.co/{ip_address}/json"
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return {"error": "Could not retrieve data"}
-    except Exception as e:
-        return {"error": str(e)}
+    if not ip:
+        st.warning("IP not yet retrieved. Please wait or refresh.")
+        st.stop()
 
-st.title("IP Address Lookup")
-if ip:
-    with st.spinner("Fetching IP information..."):
-        data = get_ip_info(ip)
-    
-    if "error" in data:
-        st.error(data["error"])
-    else:
-        st.json(data)
+    st.write("*" * 20)
+    st.write("ip:", ip)
+
+    location_data = get_ip_info(ip)
+
+    st.write("*" * 20)
+    st.write("location_data:", location_data)
+
+    return location_data
+get_user_location()
