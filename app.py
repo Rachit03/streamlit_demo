@@ -8,48 +8,65 @@ st.title("Client IP Address & Location Details")
 js_code = """
 async function getIPDetails() {
     try {
-        // First get the IP address
-        const ipResponse = await fetch('https://api.ipify.org?format=json');
-        const ipData = await ipResponse.json();
-        const ip = ipData.ip;
+        // Use ipapi.co which provides all details in one HTTPS call
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
         
-        // Then get location details using the IP
-        const locationResponse = await fetch(`http://ip-api.com/json/${ip}`);
-        const locationData = await locationResponse.json();
-        
-        // Return combined data
+        // Return formatted data
         return {
-            ip: ip,
-            country: locationData.country || 'Unknown',
-            countryCode: locationData.countryCode || 'Unknown',
-            region: locationData.region || 'Unknown',
-            regionName: locationData.regionName || 'Unknown',
-            city: locationData.city || 'Unknown',
-            zip: locationData.zip || 'Unknown',
-            latitude: locationData.lat || 'Unknown',
-            longitude: locationData.lon || 'Unknown',
-            timezone: locationData.timezone || 'Unknown',
-            isp: locationData.isp || 'Unknown',
-            org: locationData.org || 'Unknown',
-            as: locationData.as || 'Unknown'
+            ip: data.ip || 'Unknown',
+            country: data.country_name || 'Unknown',
+            countryCode: data.country_code || 'Unknown',
+            region: data.region_code || 'Unknown',
+            regionName: data.region || 'Unknown',
+            city: data.city || 'Unknown',
+            zip: data.postal || 'Unknown',
+            latitude: data.latitude || 'Unknown',
+            longitude: data.longitude || 'Unknown',
+            timezone: data.timezone || 'Unknown',
+            isp: data.org || 'Unknown',
+            org: data.org || 'Unknown',
+            as: data.asn || 'Unknown'
         };
     } catch (error) {
         console.error('Error fetching IP details:', error);
-        return {
-            ip: 'Error fetching IP',
-            country: 'Error',
-            countryCode: 'Error',
-            region: 'Error',
-            regionName: 'Error',
-            city: 'Error',
-            zip: 'Error',
-            latitude: 'Error',
-            longitude: 'Error',
-            timezone: 'Error',
-            isp: 'Error',
-            org: 'Error',
-            as: 'Error'
-        };
+        // Fallback to just IP if main service fails
+        try {
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            return {
+                ip: ipData.ip || 'Unknown',
+                country: 'Service unavailable',
+                countryCode: 'N/A',
+                region: 'N/A',
+                regionName: 'Service unavailable',
+                city: 'Service unavailable',
+                zip: 'N/A',
+                latitude: 'N/A',
+                longitude: 'N/A',
+                timezone: 'N/A',
+                isp: 'N/A',
+                org: 'N/A',
+                as: 'N/A'
+            };
+        } catch (fallbackError) {
+            console.error('Fallback also failed:', fallbackError);
+            return {
+                ip: 'Error fetching IP',
+                country: 'Error',
+                countryCode: 'Error',
+                region: 'Error',
+                regionName: 'Error',
+                city: 'Error',
+                zip: 'Error',
+                latitude: 'Error',
+                longitude: 'Error',
+                timezone: 'Error',
+                isp: 'Error',
+                org: 'Error',
+                as: 'Error'
+            };
+        }
     }
 }
 
