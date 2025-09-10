@@ -1,26 +1,18 @@
-from streamlit_javascript import st_javascript
 import streamlit as st
+import requests
 
-def get_user_location():
-    ip = st_javascript("""
-        async () => {
-            const res = await fetch('https://api.ipify.org?format=json');
-            const data = await res.json();
-            return data.ip;
-        }
-    """)
+st.title("Get Your Public IP Address using ipify")
 
-    if not ip:
-        st.warning("IP not yet retrieved. Please wait or refresh.")
-        st.stop()
+def fetch_public_ip():
+    try:
+        response = requests.get("https://api.ipify.org")
+        if response.status_code == 200:
+            return response.text.strip()
+        else:
+            st.warning(f"Unexpected response: {response.status_code}")
+    except requests.RequestException as e:
+        st.error(f"Error fetching IP: {e}")
+    return "Unavailable"
 
-    st.write("*" * 20)
-    st.write("ip:", ip)
-
-    location_data = get_ip_info(ip)
-
-    st.write("*" * 20)
-    st.write("location_data:", location_data)
-
-    return location_data
-get_user_location()
+public_ip = fetch_public_ip()
+st.write(f"Your public IP address is: **{public_ip}**")
