@@ -11,98 +11,126 @@ st.set_page_config(
     layout="wide"
 )
 
-def get_user_ip_javascript():
-    """Method 1: Get user IP using JavaScript and external API"""
-    html_code = """
-    <div style="padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
-        <h4>🔍 Detecting Your IP Address...</h4>
-        <div id="ip-result">Loading...</div>
-    </div>
+# def get_user_ip_javascript():
+#     """Method 1: Get user IP using JavaScript and external API"""
+#     html_code = """
+#     <div style="padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+#         <h4>🔍 Detecting Your IP Address...</h4>
+#         <div id="ip-result">Loading...</div>
+#     </div>
     
+#     <script>
+#     async function fetchUserIP() {
+#         try {
+#             // Try multiple IP detection services for reliability
+#             const services = [
+#                 'https://api.ipify.org?format=json',
+#                 'https://ipapi.co/json/',
+#                 'https://ip-api.com/json/'
+#             ];
+            
+#             let ipInfo = null;
+            
+#             for (const service of services) {
+#                 try {
+#                     const response = await fetch(service);
+#                     const data = await response.json();
+                    
+#                     if (service.includes('ipify')) {
+#                         ipInfo = { ip: data.ip };
+#                     } else if (service.includes('ipapi.co')) {
+#                         ipInfo = {
+#                             ip: data.ip,
+#                             city: data.city,
+#                             region: data.region,
+#                             country: data.country_name,
+#                             timezone: data.timezone
+#                         };
+#                     } else if (service.includes('ip-api')) {
+#                         ipInfo = {
+#                             ip: data.query,
+#                             city: data.city,
+#                             region: data.regionName,
+#                             country: data.country,
+#                             timezone: data.timezone
+#                         };
+#                     }
+                    
+#                     break; // Success, exit loop
+#                 } catch (error) {
+#                     console.log(`Service ${service} failed:`, error);
+#                     continue; // Try next service
+#                 }
+#             }
+            
+#             if (ipInfo) {
+#                 let resultHTML = `<strong>✅ Your IP Address: ${ipInfo.ip}</strong><br>`;
+                
+#                 if (ipInfo.city && ipInfo.country) {
+#                     resultHTML += `📍 Location: ${ipInfo.city}, ${ipInfo.region}, ${ipInfo.country}<br>`;
+#                 }
+#                 if (ipInfo.timezone) {
+#                     resultHTML += `🕐 Timezone: ${ipInfo.timezone}`;
+#                 }
+                
+#                 document.getElementById('ip-result').innerHTML = resultHTML;
+                
+#                 // Send data back to Streamlit
+#                 window.parent.postMessage({
+#                     type: 'streamlit:setComponentValue',
+#                     value: ipInfo
+#                 }, '*');
+#             } else {
+#                 throw new Error('All IP detection services failed');
+#             }
+            
+#         } catch (error) {
+#             console.error('Error fetching IP:', error);
+#             document.getElementById('ip-result').innerHTML = 
+#                 '<strong>❌ Error:</strong> Unable to detect IP address. Please check your internet connection.';
+            
+#             window.parent.postMessage({
+#                 type: 'streamlit:setComponentValue',
+#                 value: { error: 'Unable to fetch IP' }
+#             }, '*');
+#         }
+#     }
+    
+#     // Execute when page loads
+#     fetchUserIP();
+#     </script>
+#     """
+    
+#     result = components.html(html_code, height=200)
+#     return result
+import streamlit.components.v1 as components
+
+def get_user_ip_javascript():
+    """Return only user IP using JavaScript"""
+    html_code = """
     <script>
     async function fetchUserIP() {
         try {
-            // Try multiple IP detection services for reliability
-            const services = [
-                'https://api.ipify.org?format=json',
-                'https://ipapi.co/json/',
-                'https://ip-api.com/json/'
-            ];
+            const response = await fetch('https://api.ipify.org?format=json');
+            const data = await response.json();
             
-            let ipInfo = null;
-            
-            for (const service of services) {
-                try {
-                    const response = await fetch(service);
-                    const data = await response.json();
-                    
-                    if (service.includes('ipify')) {
-                        ipInfo = { ip: data.ip };
-                    } else if (service.includes('ipapi.co')) {
-                        ipInfo = {
-                            ip: data.ip,
-                            city: data.city,
-                            region: data.region,
-                            country: data.country_name,
-                            timezone: data.timezone
-                        };
-                    } else if (service.includes('ip-api')) {
-                        ipInfo = {
-                            ip: data.query,
-                            city: data.city,
-                            region: data.regionName,
-                            country: data.country,
-                            timezone: data.timezone
-                        };
-                    }
-                    
-                    break; // Success, exit loop
-                } catch (error) {
-                    console.log(`Service ${service} failed:`, error);
-                    continue; // Try next service
-                }
-            }
-            
-            if (ipInfo) {
-                let resultHTML = `<strong>✅ Your IP Address: ${ipInfo.ip}</strong><br>`;
-                
-                if (ipInfo.city && ipInfo.country) {
-                    resultHTML += `📍 Location: ${ipInfo.city}, ${ipInfo.region}, ${ipInfo.country}<br>`;
-                }
-                if (ipInfo.timezone) {
-                    resultHTML += `🕐 Timezone: ${ipInfo.timezone}`;
-                }
-                
-                document.getElementById('ip-result').innerHTML = resultHTML;
-                
-                // Send data back to Streamlit
-                window.parent.postMessage({
-                    type: 'streamlit:setComponentValue',
-                    value: ipInfo
-                }, '*');
-            } else {
-                throw new Error('All IP detection services failed');
-            }
-            
-        } catch (error) {
-            console.error('Error fetching IP:', error);
-            document.getElementById('ip-result').innerHTML = 
-                '<strong>❌ Error:</strong> Unable to detect IP address. Please check your internet connection.';
-            
+            // Send only IP back to Streamlit
             window.parent.postMessage({
                 type: 'streamlit:setComponentValue',
-                value: { error: 'Unable to fetch IP' }
+                value: data.ip
+            }, '*');
+        } catch (error) {
+            console.error('Error fetching IP:', error);
+            window.parent.postMessage({
+                type: 'streamlit:setComponentValue',
+                value: null
             }, '*');
         }
     }
-    
-    // Execute when page loads
     fetchUserIP();
     </script>
     """
-    
-    result = components.html(html_code, height=200)
-    return result
+    return components.html(html_code, height=0, width=0)
 
 def get_user_ip_server_side():
     """Method 2: Server-side IP detection (may show server IP if behind proxy)"""
