@@ -168,7 +168,7 @@ def main():
         
         # Get user IP using JavaScript
         user_ip_data = get_user_ip_javascript()
-        st.write("Your IP is:", ip)
+        st.write("Your IP is:", user_ip_data)
         if user_ip_data and isinstance(user_ip_data, dict) and 'ip' in user_ip_data:
             st.success("✅ Successfully detected your IP!")
             
